@@ -1,24 +1,17 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import type { Thread } from "@/lib/mockData";
+import type { DiscussionThread } from "@/lib/types";
 
-export default function DiscussionThreadList({ classroomId, initialThreads }: { classroomId: string; initialThreads: Thread[] }) {
-  const [threads, setThreads] = useState<Thread[]>(initialThreads);
+export default function DiscussionThreadList({ classroomId, initialThreads, onCreateThread }:{ classroomId: string; initialThreads: DiscussionThread[]; onCreateThread: (payload: { title: string; body: string }) => Promise<DiscussionThread>; }) {
+  const [threads, setThreads] = useState<DiscussionThread[]>(initialThreads);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
-  function addThread() {
+  async function addThread() {
     if (!title.trim() || !body.trim()) return;
-    const newThread: Thread = {
-      id: `t-${Date.now()}`,
-      classroomId,
-      title,
-      authorName: "You",
-      createdAt: new Date().toISOString(),
-    };
-    console.log("Thread created (mock)", newThread, { body });
-    setThreads([newThread, ...threads]);
+    const created = await onCreateThread({ title, body });
+    setThreads([created, ...threads]);
     setTitle("");
     setBody("");
   }
@@ -54,7 +47,7 @@ export default function DiscussionThreadList({ classroomId, initialThreads }: { 
               <h4 className="text-md font-semibold text-zinc-900">{t.title}</h4>
               <span className="text-xs text-zinc-500">{new Date(t.createdAt).toLocaleString()}</span>
             </div>
-            <div className="mt-1 text-sm text-zinc-700">By {t.authorName}</div>
+            {t.authorName && <div className="mt-1 text-sm text-zinc-700">By {t.authorName}</div>}
             <div className="mt-3">
               <Link
                 href={`/classrooms/${classroomId}/threads/${t.id}`}

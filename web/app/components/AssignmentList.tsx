@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Assignment } from "@/lib/mockData";
+import type { Assignment } from "@/lib/types";
 
 export default function AssignmentList({ assignments, classroomId }: { assignments: Assignment[]; classroomId: string }) {
   return (

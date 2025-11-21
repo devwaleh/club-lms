@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Lesson } from "@/lib/mockData";
+import type { Lesson } from "@/lib/types";
 
 export default function LessonList({ lessons, classroomId }: { lessons: Lesson[]; classroomId: string }) {
   return (

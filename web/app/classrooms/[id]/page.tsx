@@ -6,17 +6,15 @@ import LessonList from "@/app/components/LessonList";
 import AssignmentList from "@/app/components/AssignmentList";
 import AnnouncementList from "@/app/components/AnnouncementList";
 import DiscussionThreadList from "@/app/components/DiscussionThreadList";
-import {
-  getClassroom,
-  getLessonsForClassroom,
-  getAssignmentsForClassroom,
-  getAnnouncementsForClassroom,
-  getThreadsForClassroom,
-  type Classroom,
-} from "@/lib/mockData";
+import type { Classroom } from "@/lib/types";
+import { useClassroom } from "@/lib/hooks/classrooms";
+import { useLessons } from "@/lib/hooks/lessons";
+import { useAssignments } from "@/lib/hooks/assignments";
+import { useAnnouncements } from "@/lib/hooks/announcements";
+import { useDiscussionThreads, useCreateThread } from "@/lib/hooks/discussions";
 
 export default function ClassroomDetailPage({ params }: { params: { id: string } }) {
-  const classroom: Classroom | undefined = getClassroom(params.id);
+  const { data: classroom, isLoading: classroomLoading } = useClassroom(params.id);
   const [activeTab, setActiveTab] = useState("overview");
 
   const tabs = useMemo(
@@ -30,14 +28,19 @@ export default function ClassroomDetailPage({ params }: { params: { id: string }
     []
   );
 
+  if (classroomLoading) {
+    return <div className="h-24 animate-pulse rounded-lg bg-zinc-100" />;
+  }
+
   if (!classroom) {
     return <div className="text-sm text-zinc-600">Classroom not found.</div>;
   }
 
-  const lessons = getLessonsForClassroom(classroom.id);
-  const assignments = getAssignmentsForClassroom(classroom.id);
-  const announcements = getAnnouncementsForClassroom(classroom.id);
-  const threads = getThreadsForClassroom(classroom.id);
+  const { data: lessons = [], isLoading: lessonsLoading } = useLessons(classroom.id);
+  const { data: assignments = [], isLoading: assignmentsLoading } = useAssignments(classroom.id);
+  const { data: announcements = [], isLoading: announcementsLoading } = useAnnouncements(classroom.id);
+  const { data: threads = [], isLoading: threadsLoading, refetch: refetchThreads } = useDiscussionThreads(classroom.id);
+  const { mutate: createThread } = useCreateThread(classroom.id);
 
   return (
     <div className="space-y-6">
@@ -71,19 +74,55 @@ export default function ClassroomDetailPage({ params }: { params: { id: string }
       )}
 
       {activeTab === "lessons" && (
-        <LessonList lessons={lessons} classroomId={classroom.id} />
+        lessonsLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-20 animate-pulse rounded-lg bg-zinc-100" />
+            ))}
+          </div>
+        ) : (
+          <LessonList lessons={lessons} classroomId={classroom.id} />
+        )
       )}
 
       {activeTab === "assignments" && (
-        <AssignmentList assignments={assignments} classroomId={classroom.id} />
+        assignmentsLoading ? (
+          <div className="h-24 animate-pulse rounded-lg bg-zinc-100" />
+        ) : (
+          <AssignmentList assignments={assignments} classroomId={classroom.id} />
+        )
       )}
 
       {activeTab === "announcements" && (
-        <AnnouncementList announcements={announcements} />
+        announcementsLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="h-24 animate-pulse rounded-lg bg-zinc-100" />
+            ))}
+          </div>
+        ) : (
+          <AnnouncementList announcements={announcements} />
+        )
       )}
 
       {activeTab === "discussions" && (
-        <DiscussionThreadList classroomId={classroom.id} initialThreads={threads} />
+        threadsLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="h-24 animate-pulse rounded-lg bg-zinc-100" />
+            ))}
+          </div>
+        ) : (
+          <DiscussionThreadList
+            classroomId={classroom.id}
+            initialThreads={threads}
+            onCreateThread={async (payload) => {
+              const created = await createThread(payload);
+              await refetchThreads();
+              return created as any;
+            }}
+          />
+        )
       )}
 
       <div className="pt-2 text-sm text-zinc-700">

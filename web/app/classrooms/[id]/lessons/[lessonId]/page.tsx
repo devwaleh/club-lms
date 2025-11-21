@@ -1,22 +1,23 @@
 import Link from "next/link";
-import {
-  getClassroom,
-  getLessonById,
-  getAssignmentsForClassroom,
-  type Lesson,
-} from "@/lib/mockData";
+import { useLesson } from "@/lib/hooks/lessons";
+import { useAssignments } from "@/lib/hooks/assignments";
+import { useClassroom } from "@/lib/hooks/classrooms";
+import type { Lesson } from "@/lib/types";
 
 export default function LessonDetailPage({ params }: { params: { id: string; lessonId: string } }) {
-  const classroom = getClassroom(params.id);
-  const lesson: Lesson | undefined = getLessonById(params.lessonId);
+  const { data: classroom } = useClassroom(params.id);
+  const { data: lesson, isLoading } = useLesson(params.lessonId);
+  const { data: assignments = [] } = useAssignments(params.id);
+
+  if (isLoading) {
+    return <div className="h-24 animate-pulse rounded-lg bg-zinc-100" />;
+  }
 
   if (!classroom || !lesson) {
     return <div className="text-sm text-zinc-600">Lesson not found.</div>;
   }
 
-  const relatedAssignments = getAssignmentsForClassroom(classroom.id).filter((a) =>
-    lesson.relatedAssignmentIds?.includes(a.id) || a.relatedLessonId === lesson.id
-  );
+  const relatedAssignments = assignments.filter((a) => (a as any).relatedLessonId === (lesson as Lesson).id);
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Classroom } from "@/lib/mockData";
+import type { Classroom } from "@/lib/types";
 
 export default function ClassroomCard({ classroom }: { classroom: Classroom }) {
   return (

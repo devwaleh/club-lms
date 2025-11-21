@@ -2,11 +2,12 @@
 import PageHeader from "@/app/components/PageHeader";
 import ClassroomCard from "@/app/components/ClassroomCard";
 import CreateClassroomModal from "@/app/components/CreateClassroomModal";
-import { mockClassrooms } from "@/lib/mockData";
 import { useState } from "react";
+import { useClassrooms } from "@/lib/hooks/classrooms";
 
 export default function ClassroomsPage() {
   const [open, setOpen] = useState(false);
+  const { data, isLoading, isError, refetch } = useClassrooms();
 
   return (
     <div>
@@ -19,13 +20,31 @@ export default function ClassroomsPage() {
         </button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {mockClassrooms.map((c) => (
-          <ClassroomCard key={c.id} classroom={c} />
-        ))}
-      </div>
+      {isLoading && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-32 animate-pulse rounded-lg bg-zinc-100" />
+          ))}
+        </div>
+      )}
+
+      {isError && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          Failed to load classrooms.
+          <button onClick={refetch} className="ml-2 underline">Retry</button>
+        </div>
+      )}
+
+      {data && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {data.length === 0 ? (
+            <div className="col-span-full text-sm text-zinc-600">No classrooms yet.</div>
+          ) : (
+            data.map((c) => <ClassroomCard key={c.id} classroom={c} />)
+          )}
+        </div>
+      )}
 
       <CreateClassroomModal open={open} onClose={() => setOpen(false)} />
     </div>
-  );
-}
+  );}

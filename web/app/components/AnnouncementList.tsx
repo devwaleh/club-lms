@@ -1,4 +1,4 @@
-import type { Announcement } from "@/lib/mockData";
+import type { Announcement } from "@/lib/types";
 
 export default function AnnouncementList({ announcements }: { announcements: Announcement[] }) {
   return (

@@ -1,14 +1,22 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { getAssignmentById, getClassroom, type Assignment } from "@/lib/mockData";
+import type { Assignment } from "@/lib/types";
+import { useAssignment } from "@/lib/hooks/assignments";
+import { useClassroom } from "@/lib/hooks/classrooms";
+import { useCreateSubmission } from "@/lib/hooks/assignments";
 
 export default function AssignmentDetailPage({ params }: { params: { id: string; assignmentId: string } }) {
-  const classroom = getClassroom(params.id);
-  const assignment: Assignment | undefined = getAssignmentById(params.assignmentId);
+  const { data: classroom } = useClassroom(params.id);
+  const { data: assignment, isLoading } = useAssignment(params.assignmentId);
+  const { mutate: createSubmission, isPending } = useCreateSubmission(params.assignmentId);
   const [textAnswer, setTextAnswer] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  if (isLoading) {
+    return <div className="h-24 animate-pulse rounded-lg bg-zinc-100" />;
+  }
 
   if (!classroom || !assignment) {
     return <div className="text-sm text-zinc-600">Assignment not found.</div>;
@@ -19,12 +27,10 @@ export default function AssignmentDetailPage({ params }: { params: { id: string;
     setFileName(file ? file.name : null);
   }
 
-  function submit() {
-    console.log("Submit assignment (mock)", {
-      assignmentId: assignment.id,
-      textAnswer,
-      fileName,
-    });
+  async function submit() {
+    const fileInput = (document.querySelector("input[type='file']") as HTMLInputElement) || null;
+    const file = fileInput?.files?.[0] || null;
+    await createSubmission({ text_answer: textAnswer, file });
     setSubmitted(true);
   }
 
@@ -51,7 +57,7 @@ export default function AssignmentDetailPage({ params }: { params: { id: string;
             <input type="file" onChange={onFileChange} />
             {fileName && <span className="text-xs text-zinc-600">Selected: {fileName}</span>}
           </div>
-          <button onClick={submit} className="rounded-md bg-black px-3 py-2 text-sm text-white hover:bg-zinc-800">
+          <button disabled={isPending} onClick={submit} className="rounded-md bg-black px-3 py-2 text-sm text-white hover:bg-zinc-800 disabled:opacity-50">
             Submit assignment
           </button>
           {submitted && (

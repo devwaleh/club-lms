@@ -1,30 +1,31 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { getClassroom, getThreadById, getCommentsForThread, type Thread, type Comment } from "@/lib/mockData";
+import type { DiscussionComment, DiscussionThreadWithComments } from "@/lib/types";
+import { useClassroom } from "@/lib/hooks/classrooms";
+import { useDiscussionThread, useCreateComment } from "@/lib/hooks/discussions";
 
 export default function ThreadDetailPage({ params }: { params: { id: string; threadId: string } }) {
-  const classroom = getClassroom(params.id);
-  const thread: Thread | undefined = getThreadById(params.threadId);
-  const [comments, setComments] = useState<Comment[]>(getCommentsForThread(params.threadId));
+  const { data: classroom } = useClassroom(params.id);
+  const { data: thread, isLoading, refetch } = useDiscussionThread(params.threadId);
+  const [comments, setComments] = useState<DiscussionComment[]>(thread?.comments ?? []);
   const [body, setBody] = useState("");
+  const { mutate: createComment, isPending } = useCreateComment(params.threadId);
+
+  if (isLoading) {
+    return <div className="h-24 animate-pulse rounded-lg bg-zinc-100" />;
+  }
 
   if (!classroom || !thread) {
     return <div className="text-sm text-zinc-600">Thread not found.</div>;
   }
 
-  function addComment() {
+  async function addComment() {
     if (!body.trim()) return;
-    const newC: Comment = {
-      id: `cm-${Date.now()}`,
-      threadId: thread.id,
-      authorName: "You",
-      body,
-      createdAt: new Date().toISOString(),
-    };
-    console.log("Add comment (mock)", newC);
-    setComments([...comments, newC]);
+    await createComment({ body });
     setBody("");
+    await refetch();
+    setComments((thread as DiscussionThreadWithComments).comments);
   }
 
   return (
@@ -54,7 +55,7 @@ export default function ThreadDetailPage({ params }: { params: { id: string; thr
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
             rows={4}
           />
-          <button onClick={addComment} className="rounded-md bg-black px-3 py-2 text-sm text-white hover:bg-zinc-800">
+          <button disabled={isPending} onClick={addComment} className="rounded-md bg-black px-3 py-2 text-sm text-white hover:bg-zinc-800 disabled:opacity-50">
             Add comment
           </button>
         </div>
