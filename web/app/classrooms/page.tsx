@@ -4,13 +4,15 @@ import ClassroomCard from "@/app/components/ClassroomCard";
 import CreateClassroomModal from "@/app/components/CreateClassroomModal";
 import { useState } from "react";
 import { useClassrooms } from "@/lib/hooks/classrooms";
+import ProtectedPage from "@/app/components/ProtectedPage";
 
 export default function ClassroomsPage() {
   const [open, setOpen] = useState(false);
   const { data, isLoading, isError, refetch } = useClassrooms();
 
   return (
-    <div>
+    <ProtectedPage>
+      <div>
       <PageHeader title="Your Classrooms">
         <button
           onClick={() => setOpen(true)}
@@ -46,5 +48,6 @@ export default function ClassroomsPage() {
       )}
 
       <CreateClassroomModal open={open} onClose={() => setOpen(false)} />
-    </div>
+      </div>
+    </ProtectedPage>
   );}

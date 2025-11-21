@@ -5,6 +5,7 @@ import type { Assignment } from "@/lib/types";
 import { useAssignment } from "@/lib/hooks/assignments";
 import { useClassroom } from "@/lib/hooks/classrooms";
 import { useCreateSubmission } from "@/lib/hooks/assignments";
+import ProtectedPage from "@/app/components/ProtectedPage";
 
 export default function AssignmentDetailPage({ params }: { params: { id: string; assignmentId: string } }) {
   const { data: classroom } = useClassroom(params.id);
@@ -35,6 +36,7 @@ export default function AssignmentDetailPage({ params }: { params: { id: string;
   }
 
   return (
+    <ProtectedPage>
     <div className="space-y-6">
       <div className="rounded-lg border border-zinc-200 bg-white p-6">
         <h2 className="text-xl font-semibold text-zinc-900">{assignment.title}</h2>
@@ -80,5 +82,6 @@ export default function AssignmentDetailPage({ params }: { params: { id: string;
         </Link>
       </div>
     </div>
+    </ProtectedPage>
   );
 }

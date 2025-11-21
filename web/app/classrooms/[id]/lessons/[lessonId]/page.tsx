@@ -3,6 +3,7 @@ import { useLesson } from "@/lib/hooks/lessons";
 import { useAssignments } from "@/lib/hooks/assignments";
 import { useClassroom } from "@/lib/hooks/classrooms";
 import type { Lesson } from "@/lib/types";
+import ProtectedPage from "@/app/components/ProtectedPage";
 
 export default function LessonDetailPage({ params }: { params: { id: string; lessonId: string } }) {
   const { data: classroom } = useClassroom(params.id);
@@ -20,6 +21,7 @@ export default function LessonDetailPage({ params }: { params: { id: string; les
   const relatedAssignments = assignments.filter((a) => (a as any).relatedLessonId === (lesson as Lesson).id);
 
   return (
+    <ProtectedPage>
     <div className="space-y-6">
       <div className="rounded-lg border border-zinc-200 bg-white p-6">
         <h2 className="text-xl font-semibold text-zinc-900">{lesson.title}</h2>
@@ -60,5 +62,6 @@ export default function LessonDetailPage({ params }: { params: { id: string; les
         </Link>
       </div>
     </div>
+    </ProtectedPage>
   );
 }

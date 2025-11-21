@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DiscussionComment, DiscussionThreadWithComments } from "@/lib/types";
 import { useClassroom } from "@/lib/hooks/classrooms";
 import { useDiscussionThread, useCreateComment } from "@/lib/hooks/discussions";
+import ProtectedPage from "@/app/components/ProtectedPage";
 
 export default function ThreadDetailPage({ params }: { params: { id: string; threadId: string } }) {
   const { data: classroom } = useClassroom(params.id);
@@ -29,6 +30,7 @@ export default function ThreadDetailPage({ params }: { params: { id: string; thr
   }
 
   return (
+    <ProtectedPage>
     <div className="space-y-6">
       <div className="rounded-lg border border-zinc-200 bg-white p-6">
         <h2 className="text-xl font-semibold text-zinc-900">{thread.title}</h2>
@@ -67,5 +69,6 @@ export default function ThreadDetailPage({ params }: { params: { id: string; thr
         </Link>
       </div>
     </div>
+    </ProtectedPage>
   );
 }

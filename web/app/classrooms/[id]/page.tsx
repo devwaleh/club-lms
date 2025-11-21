@@ -12,6 +12,7 @@ import { useLessons } from "@/lib/hooks/lessons";
 import { useAssignments } from "@/lib/hooks/assignments";
 import { useAnnouncements } from "@/lib/hooks/announcements";
 import { useDiscussionThreads, useCreateThread } from "@/lib/hooks/discussions";
+import ProtectedPage from "@/app/components/ProtectedPage";
 
 export default function ClassroomDetailPage({ params }: { params: { id: string } }) {
   const { data: classroom, isLoading: classroomLoading } = useClassroom(params.id);
@@ -43,6 +44,7 @@ export default function ClassroomDetailPage({ params }: { params: { id: string }
   const { mutate: createThread } = useCreateThread(classroom.id);
 
   return (
+    <ProtectedPage>
     <div className="space-y-6">
       <header className="rounded-lg border border-zinc-200 bg-white p-6">
         <div className="flex items-center justify-between">
@@ -131,5 +133,6 @@ export default function ClassroomDetailPage({ params }: { params: { id: string }
         </Link>
       </div>
     </div>
+    </ProtectedPage>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import useAuth from "@/hooks/useAuth";
 
 export default function ClassroomsLayout({ children }: { children: React.ReactNode }) {
+  const { logout } = useAuth();
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
@@ -9,9 +11,14 @@ export default function ClassroomsLayout({ children }: { children: React.ReactNo
             Classrooms
           </Link>
         </div>
-        <Link href="/" className="text-sm text-zinc-700 hover:underline">
-          Back to Home
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="text-sm text-zinc-700 hover:underline">
+            Home
+          </Link>
+          <button onClick={async () => { await logout(); location.href = "/login"; }} className="rounded-md border border-zinc-300 px-3 py-1 text-sm hover:bg-zinc-50">
+            Logout
+          </button>
+        </div>
       </div>
       {children}
     </div>
