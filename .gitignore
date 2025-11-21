@@ -1,0 +1,7 @@
+api/vendor/
+api/node_modules/
+web/node_modules/
+web/.next/
+.env
+.env.local
+node_modules
