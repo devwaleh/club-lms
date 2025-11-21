@@ -8,6 +8,21 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\DiscussionThreadController;
 use App\Http\Controllers\Api\DiscussionCommentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
+
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->noContent(); // Sanctum middleware will set the cookie
+});
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/api/user', function (Request $request) {
+        return $request->user();
+    });
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     // Classrooms
