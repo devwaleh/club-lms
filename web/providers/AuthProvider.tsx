@@ -14,15 +14,15 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function rootBaseURL() {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-  return base.replace(/\/api$/, "");
-}
+
+
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const bootstrapped = useRef(false);
+
+
 
   async function refreshUser() {
     try {
@@ -43,17 +43,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   async function login(email: string, password: string) {
-    await api.get("/sanctum/csrf-cookie", { baseURL: rootBaseURL() });
+    await api.get("/sanctum/csrf-cookie");
     await api.post(
       "/login",
-      { email, password },
-      { baseURL: rootBaseURL() }
+      { email, password }
     );
     await refreshUser();
   }
 
   async function logout() {
-    await api.post("/logout", {}, { baseURL: rootBaseURL() });
+    await api.post("/logout");
     setUser(null);
   }
 
